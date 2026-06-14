@@ -11,6 +11,9 @@ HIGH_PRIORITY_WORDS = [
     "account locked",
     "interview",
     "appointment",
+    "final notice",
+    "verify",
+    "suspicious",
 ]
 
 MEDIUM_PRIORITY_WORDS = [
@@ -30,6 +33,8 @@ LOW_PRIORITY_WORDS = [
     "newsletter",
     "promotion",
     "deal",
+    "offer",
+    "coupon",
 ]
 
 

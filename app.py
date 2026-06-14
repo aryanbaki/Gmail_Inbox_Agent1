@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 from src.actions import archive_messages, apply_label_to_messages, mark_messages_read
@@ -15,49 +16,81 @@ st.set_page_config(page_title="Gmail Inbox Agent", layout="wide")
 st.markdown(
     """
     <style>
+    html, body, [data-testid="stAppViewContainer"] {
+        background: #080b12;
+        color: #e5e7eb;
+    }
+    [data-testid="stSidebar"] {
+        background: #0d111c;
+        border-right: 1px solid #1f2937;
+    }
+    [data-testid="stHeader"] {
+        background: rgba(8, 11, 18, 0.75);
+    }
     .block-container {
         padding-top: 2rem;
         padding-bottom: 3rem;
+        max-width: 1280px;
     }
     .app-hero {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1.4rem 1.6rem;
-        margin-bottom: 1.2rem;
-        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border: 1px solid #1f2a44;
+        border-radius: 18px;
+        padding: 1.65rem 1.8rem;
+        margin-bottom: 1.35rem;
+        background:
+            radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.28), transparent 32%),
+            linear-gradient(135deg, #111827 0%, #0b1120 55%, #111827 100%);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
     }
     .app-hero h1 {
         margin: 0 0 0.25rem 0;
-        font-size: 2.2rem;
+        font-size: 2.45rem;
+        color: #f8fafc;
     }
     .app-hero p {
         margin: 0;
-        color: #475569;
+        color: #cbd5e1;
         font-size: 1rem;
     }
+    .hero-kicker {
+        color: #93c5fd;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.45rem;
+    }
     .metric-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
+        border: 1px solid #25314a;
+        border-radius: 14px;
         padding: 1rem;
-        background: #ffffff;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+        background: #111827;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
     }
     .metric-label {
-        color: #64748b;
+        color: #94a3b8;
         font-size: 0.82rem;
         margin-bottom: 0.25rem;
     }
     .metric-value {
-        color: #0f172a;
+        color: #f8fafc;
         font-size: 1.8rem;
         font-weight: 700;
         line-height: 1;
     }
     .section-note {
-        color: #64748b;
+        color: #94a3b8;
         font-size: 0.92rem;
         margin-top: -0.35rem;
         margin-bottom: 0.85rem;
+    }
+    div[data-testid="stExpander"] {
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        background: #0f172a;
+    }
+    div[data-testid="stAlert"] {
+        border-radius: 12px;
     }
     </style>
     """,
@@ -66,7 +99,7 @@ st.markdown(
 
 st.title("Gmail Inbox Agent")
 st.caption(
-    "Review, search, cluster, prioritize, export, and safely act on Gmail inbox groups."
+    "Turn inbox chaos into organized action groups."
 )
 
 
@@ -278,18 +311,57 @@ def render_metrics(all_emails: pd.DataFrame, filtered_emails: pd.DataFrame, clus
 
 
 def render_charts(emails: pd.DataFrame) -> None:
-    """Render simple priority and cluster distribution charts."""
+    """Render polished priority and cluster distribution charts."""
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
         st.subheader("Priority Distribution")
-        priority_counts = emails["priority"].value_counts().reindex(["high", "medium", "low"], fill_value=0)
-        st.bar_chart(priority_counts)
+        priority_counts = (
+            emails["priority"]
+            .value_counts()
+            .reindex(["high", "medium", "low"], fill_value=0)
+            .reset_index()
+        )
+        priority_counts.columns = ["priority", "count"]
+        fig = px.bar(
+            priority_counts,
+            x="priority",
+            y="count",
+            color="priority",
+            color_discrete_map={
+                "high": "#ef4444",
+                "medium": "#f59e0b",
+                "low": "#22c55e",
+            },
+            template="plotly_dark",
+        )
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            showlegend=False,
+            margin=dict(l=10, r=10, t=10, b=10),
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     with chart_col2:
         st.subheader("Cluster Distribution")
-        cluster_counts = emails["cluster_name"].value_counts()
-        st.bar_chart(cluster_counts)
+        cluster_counts = emails["cluster_name"].value_counts().reset_index()
+        cluster_counts.columns = ["cluster", "count"]
+        fig = px.bar(
+            cluster_counts,
+            x="cluster",
+            y="count",
+            color="cluster",
+            template="plotly_dark",
+        )
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            showlegend=False,
+            margin=dict(l=10, r=10, t=10, b=10),
+            xaxis_title="",
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 
 def render_exports(emails: pd.DataFrame, cluster_summary: pd.DataFrame) -> None:
@@ -404,8 +476,9 @@ if mode == "Demo Mode":
     st.markdown(
         """
         <div class="app-hero">
+            <div class="hero-kicker">Private demo workspace</div>
             <h1>Demo inbox dashboard</h1>
-            <p>Explore clustering, priority scoring, exports, and simulated actions without Gmail credentials.</p>
+            <p>Turn inbox chaos into organized action groups. Demo Mode uses mock data, while Gmail Mode uses local OAuth only when you choose it. Credentials and tokens stay local and are ignored by Git.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -417,8 +490,9 @@ else:
     st.markdown(
         """
         <div class="app-hero">
+            <div class="hero-kicker">Local Gmail OAuth</div>
             <h1>Gmail inbox dashboard</h1>
-            <p>Connect locally with OAuth, analyze recent inbox messages, and take safe grouped actions.</p>
+            <p>Turn inbox chaos into organized action groups. Fetch your latest inbox emails, cluster them, prioritize what matters, and take safe grouped actions.</p>
         </div>
         """,
         unsafe_allow_html=True,

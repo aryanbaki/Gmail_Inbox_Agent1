@@ -1,6 +1,6 @@
 # Gmail Inbox Agent
 
-Gmail Inbox Agent is a Python Streamlit app for reviewing a Gmail inbox more quickly. It can run in Demo Mode with fake email data, or in Gmail Mode with local OAuth so you can fetch, cluster, search, prioritize, label, mark read, and archive recent inbox messages.
+Gmail Inbox Agent is a polished dark Streamlit dashboard for reviewing a Gmail inbox more quickly. It can run in Demo Mode with fake email data, or in Gmail Mode with local OAuth so you can fetch, cluster, search, prioritize, label, mark read, and archive recent inbox messages.
 
 The project is designed to be safe for GitHub. Real Gmail OAuth files stay local and are ignored by Git.
 
@@ -14,14 +14,14 @@ The project is designed to be safe for GitHub. Real Gmail OAuth files stay local
 - Adds priority labels: high, medium, low
 - Explains each priority decision with `priority_reason`
 - Lets you search and filter by text, priority, cluster, sender, and unread status
-- Shows email metrics, cluster summaries, charts, grouped tables, and expandable previews
+- Shows email metrics, cluster summaries, dark Plotly charts, grouped tables, and expandable previews
 - Exports processed emails, cluster summaries, and high priority emails as CSV
 - Provides safe Gmail actions on selected clusters
 
 ## File Structure
 
 ```text
-Gmail_Inbox_Agent1/
+Gmail-Inbox-Agent-1/
   app.py                       Streamlit app entry point
   requirements.txt             Python dependencies
   README.md                    Beginner setup and usage guide
@@ -55,7 +55,7 @@ This app does not support permanent deletion. Archive only removes the `INBOX` l
 ## Local Setup
 
 ```bash
-cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent1
+cd /Users/aryanbaki/Documents/Buildathon/Gmail-Inbox-Agent-1
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -160,7 +160,7 @@ This project should live in its own repository, not inside another project repo.
 Recommended Git commands:
 
 ```bash
-cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent1
+cd /Users/aryanbaki/Documents/Buildathon/Gmail-Inbox-Agent-1
 git status
 git add .
 git commit -m "Polish final Gmail Inbox Agent project"
