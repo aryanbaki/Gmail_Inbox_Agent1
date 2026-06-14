@@ -1,6 +1,6 @@
 # Gmail Inbox Agent
 
-Gmail Inbox Agent is a Streamlit app that helps review recent inbox messages. It can run with fake demo data or connect to Gmail through local OAuth, fetch the last 200 inbox messages, group similar emails, and assign priority labels.
+Gmail Inbox Agent is a Streamlit app that helps review recent inbox messages. It can run with fake demo data or connect to Gmail through local OAuth, fetch the last 200 inbox messages, group similar emails, assign priority labels, and take safe actions on clustered messages.
 
 ## Privacy and Security
 
@@ -29,7 +29,21 @@ streamlit run app.py
 5. Run the app and choose Gmail Mode in the sidebar.
 6. Complete the browser login. The app will create `token.json` locally.
 
-Gmail Mode fetches the last 200 inbox messages and analyzes them locally. This iteration is read/analyze only; archive and label actions are not implemented yet.
+Gmail Mode fetches the last 200 inbox messages and analyzes them locally. It uses the `gmail.modify` scope so it can safely archive, mark as read, and label selected messages.
+
+## Gmail Actions
+
+Actions are available only after messages are grouped by cluster.
+
+- Archive this group: removes the `INBOX` label from messages in the selected cluster. This does not delete emails.
+- Mark group as read: removes the `UNREAD` label from messages in the selected cluster.
+- Apply label to group: creates the suggested label if it does not exist, then applies it to messages in the selected cluster.
+
+Deleted emails are not supported in this app. There is no permanent delete action.
+
+In Demo Mode, action buttons are simulated only. In Gmail Mode, actions affect only the messages in the selected cluster after you confirm the count shown in the app.
+
+To test safely, start with a small, obvious cluster such as promotions or newsletters. Confirm the message count before clicking an action, then reload Gmail Mode to fetch the updated inbox.
 
 ## Current Status
 
