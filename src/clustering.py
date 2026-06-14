@@ -7,22 +7,34 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
+WEAK_CLUSTER_TERMS = {"email", "message", "gmail", "inbox", "new"}
+
+
+def _fallback_cluster_name(cluster_id: int) -> str:
+    """Return a readable fallback name when top terms are not useful."""
+    return f"Cluster {cluster_id}"
+
+
 def _name_clusters(vectorizer: TfidfVectorizer, model: KMeans) -> dict[int, str]:
     """Use each cluster center's strongest words as a simple readable name."""
     words = vectorizer.get_feature_names_out()
     cluster_names = {}
 
     for cluster_id, center in enumerate(model.cluster_centers_):
-        top_word_indexes = center.argsort()[-3:][::-1]
-        top_words = [words[index].title() for index in top_word_indexes]
-        cluster_names[cluster_id] = ", ".join(top_words)
+        top_word_indexes = center.argsort()[-5:][::-1]
+        top_words = [
+            words[index].title()
+            for index in top_word_indexes
+            if words[index].lower() not in WEAK_CLUSTER_TERMS and center[index] > 0
+        ]
+        cluster_names[cluster_id] = ", ".join(top_words[:3]) or _fallback_cluster_name(cluster_id)
 
     return cluster_names
 
 
 def cluster_emails(
     emails: pd.DataFrame,
-    n_clusters: int = 4,
+    n_clusters: int = 5,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Cluster emails with TF-IDF and KMeans."""
     clustered_emails = emails.copy()

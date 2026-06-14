@@ -1,50 +1,174 @@
 # Gmail Inbox Agent
 
-Gmail Inbox Agent is a Streamlit app that helps review recent inbox messages. It can run with fake demo data or connect to Gmail through local OAuth, fetch the last 200 inbox messages, group similar emails, assign priority labels, and take safe actions on clustered messages.
+Gmail Inbox Agent is a Python Streamlit app for reviewing a Gmail inbox more quickly. It can run in Demo Mode with fake email data, or in Gmail Mode with local OAuth so you can fetch, cluster, search, prioritize, label, mark read, and archive recent inbox messages.
 
-## Privacy and Security
+The project is designed to be safe for GitHub. Real Gmail OAuth files stay local and are ignored by Git.
 
-Do not commit `credentials.json` or `token.json` to GitHub.
+## What The App Does
 
-For Gmail Mode, place your downloaded Google OAuth client file in the project root and name it `credentials.json`. The app creates `token.json` after your first successful browser login. Both files are private, local-only files and are already ignored by Git.
+- Loads demo emails from `data/mock_emails.csv`
+- Optionally connects to Gmail locally with OAuth
+- Fetches the last 200 Gmail inbox messages in Gmail Mode
+- Parses sender, subject, date, snippet, body, labels, message ID, and thread ID
+- Groups similar emails with TF-IDF and KMeans
+- Adds priority labels: high, medium, low
+- Explains each priority decision with `priority_reason`
+- Lets you search and filter by text, priority, cluster, sender, and unread status
+- Shows email metrics, cluster summaries, charts, grouped tables, and expandable previews
+- Exports processed emails, cluster summaries, and high priority emails as CSV
+- Provides safe Gmail actions on selected clusters
 
-Demo Mode does not require Gmail credentials.
+## File Structure
+
+```text
+Gmail_Inbox_Agent/
+  app.py                       Streamlit app entry point
+  requirements.txt             Python dependencies
+  README.md                    Beginner setup and usage guide
+  .gitignore                   Keeps private files out of Git
+  .streamlit/config.toml       Streamlit display/runtime config
+  .streamlit/secrets.toml.example
+  data/mock_emails.csv         Fake emails for Demo Mode
+  src/
+    actions.py                 Safe Gmail archive/read/label actions
+    clustering.py              TF-IDF and KMeans grouping
+    config.py                  App constants and local paths
+    dashboard.py               Small dashboard helper functions
+    email_parser.py            Demo CSV loading and Gmail message parsing
+    gmail_auth.py              Local OAuth authentication
+    gmail_client.py            Gmail inbox fetching
+    priority.py                Rule-based priority scoring and reasons
+```
+
+## Privacy And Security
+
+Never commit these files:
+
+- `credentials.json`
+- `token.json`
+- `.env`
+
+`credentials.json` contains your local OAuth client configuration. `token.json` is created after your first successful Gmail login and grants local access according to the app scope. Both are ignored in `.gitignore`.
+
+This app does not support permanent deletion. Archive only removes the `INBOX` label.
 
 ## Local Setup
 
 ```bash
-cd Gmail_Inbox_Agent
+cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## Demo Mode
+
+Demo Mode is the safest way to run the app locally or on Streamlit Cloud.
+
+1. Start the app.
+2. Choose `Demo Mode` in the sidebar.
+3. Use search, filters, charts, exports, and simulated action buttons.
+
+Demo Mode does not require `credentials.json` or `token.json`.
+
+## Gmail Setup
+
+Gmail Mode is intended for local VS Code or local terminal use.
+
+1. Go to Google Cloud Console.
+2. Create or choose a project.
+3. Enable the Gmail API.
+4. Configure the OAuth consent screen.
+5. Create OAuth credentials for a desktop app.
+6. Download the OAuth client JSON file.
+7. Rename the downloaded file to `credentials.json`.
+8. Place `credentials.json` in the project root next to `app.py`.
+9. Run the app locally and choose `Gmail Mode`.
+10. Complete the browser login.
+
+After login, the app creates `token.json` locally. Keep both files private.
+
 ## Gmail Mode
 
-1. Create OAuth credentials for the Gmail API in Google Cloud.
-2. Download the OAuth client JSON file.
-3. Rename it to `credentials.json`.
-4. Place it in the project root next to `app.py`.
-5. Run the app and choose Gmail Mode in the sidebar.
-6. Complete the browser login. The app will create `token.json` locally.
+Gmail Mode fetches the last 200 inbox messages using:
 
-Gmail Mode fetches the last 200 inbox messages and analyzes them locally. It uses the `gmail.modify` scope so it can safely archive, mark as read, and label selected messages.
+```python
+https://www.googleapis.com/auth/gmail.modify
+```
 
-## Gmail Actions
+The `gmail.modify` scope is needed because the app can archive, mark as read, and apply labels. If `credentials.json` is missing, the app shows a helpful setup message and Demo Mode keeps working.
 
-Actions are available only after messages are grouped by cluster.
+## Safe Gmail Actions
 
-- Archive this group: removes the `INBOX` label from messages in the selected cluster. This does not delete emails.
-- Mark group as read: removes the `UNREAD` label from messages in the selected cluster.
-- Apply label to group: creates the suggested label if it does not exist, then applies it to messages in the selected cluster.
+Actions apply only to the messages in the selected cluster and require confirmation.
 
-Deleted emails are not supported in this app. There is no permanent delete action.
+- Archive this group: removes the `INBOX` label. It does not delete emails.
+- Mark group as read: removes the `UNREAD` label.
+- Apply label to group: creates the label if needed, then applies it.
 
-In Demo Mode, action buttons are simulated only. In Gmail Mode, actions affect only the messages in the selected cluster after you confirm the count shown in the app.
+Suggested labels include:
 
-To test safely, start with a small, obvious cluster such as promotions or newsletters. Confirm the message count before clicking an action, then reload Gmail Mode to fetch the updated inbox.
+- `Gmail Assistant/Promotions`
+- `Gmail Assistant/Receipts`
+- `Gmail Assistant/Urgent`
+- `Gmail Assistant/School`
+- `Gmail Assistant/Finance`
+- `Gmail Assistant/Newsletters`
 
-## Current Status
+Test actions on a small obvious cluster first, such as newsletters or promotions. Reload Gmail Mode after an action to refresh the inbox view.
 
-Demo Mode and Gmail Mode are available. Demo Mode uses fake email data from `data/mock_emails.csv`; Gmail Mode uses local OAuth and your private `credentials.json`.
+## CSV Exports
+
+The app can export:
+
+- Processed email table
+- Cluster summary
+- High priority emails
+
+Exports contain email analysis data only. They do not export `credentials.json`, `token.json`, or secrets.
+
+## Streamlit Cloud Deployment
+
+This repository can be deployed in Demo Mode.
+
+Important: local Gmail OAuth with `credentials.json` is for local use. Streamlit Cloud should run Demo Mode only unless web OAuth is implemented later.
+
+Do not upload `credentials.json` or `token.json` to GitHub or Streamlit Cloud.
+
+## Troubleshooting
+
+Missing `credentials.json`:
+The app will show setup instructions in Gmail Mode. Demo Mode still works.
+
+OAuth opens a browser but fails:
+Check that the Gmail API is enabled and that your OAuth credentials are for a desktop app.
+
+Token problems:
+Stop the app, delete local `token.json`, and try Gmail Mode again. Do not commit the new token.
+
+No messages appear:
+Your inbox may be empty, or Gmail may not return messages for the selected account. Demo Mode can still be used.
+
+Gmail actions do not appear to change the dashboard:
+Reload Gmail Mode after an action. Archive removes messages from the inbox, so archived messages should disappear from the fetched inbox list.
+
+## GitHub Notes
+
+This project should live in its own repository, not inside another project repo.
+
+Recommended Git commands:
+
+```bash
+cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent
+git status
+git add .
+git commit -m "Polish final Gmail Inbox Agent project"
+git push -u origin main
+```
+
+Before pushing, make sure these files are not present in `git status`:
+
+- `credentials.json`
+- `token.json`
+- `.env`

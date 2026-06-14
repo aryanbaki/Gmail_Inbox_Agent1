@@ -1,6 +1,7 @@
 .venv/
 **pycache**/
 .env
+.streamlit/secrets.toml
 credentials.json
 token.json
 data/processed_emails.csv
