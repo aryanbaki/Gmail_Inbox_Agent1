@@ -115,7 +115,7 @@ def parse_gmail_messages(raw_messages: list[dict]) -> pd.DataFrame:
 
 
 def parse_email_message(raw_message: dict) -> dict:
-    """Later, this will normalize raw Gmail message payloads into app-friendly rows."""
+    """Normalize a simple dictionary email payload into app-friendly fields."""
     return {
         "id": raw_message.get("id", ""),
         "from_email": raw_message.get("from_email", ""),
