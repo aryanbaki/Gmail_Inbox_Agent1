@@ -24,12 +24,59 @@ def cluster_emails(
     emails: pd.DataFrame,
     n_clusters: int = 4,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Cluster demo emails with TF-IDF and KMeans."""
+    """Cluster emails with TF-IDF and KMeans."""
     clustered_emails = emails.copy()
+
+    if clustered_emails.empty:
+        clustered_emails["cluster_id"] = []
+        clustered_emails["cluster_name"] = []
+        return clustered_emails, pd.DataFrame(
+            columns=[
+                "cluster_id",
+                "cluster_name",
+                "email_count",
+                "sample_subject",
+                "high_priority_count",
+            ]
+        )
+
     cluster_count = min(n_clusters, len(clustered_emails))
+    clustered_emails["clean_text"] = clustered_emails["clean_text"].fillna("")
+
+    if not clustered_emails["clean_text"].str.strip().any():
+        clustered_emails["cluster_id"] = 0
+        clustered_emails["cluster_name"] = "Uncategorized"
+        cluster_summary = pd.DataFrame(
+            [
+                {
+                    "cluster_id": 0,
+                    "cluster_name": "Uncategorized",
+                    "email_count": len(clustered_emails),
+                    "sample_subject": clustered_emails["subject"].iloc[0],
+                    "high_priority_count": (clustered_emails["priority"] == "high").sum(),
+                }
+            ]
+        )
+        return clustered_emails, cluster_summary
 
     vectorizer = TfidfVectorizer(stop_words="english", max_features=100)
-    text_vectors = vectorizer.fit_transform(clustered_emails["clean_text"])
+    try:
+        text_vectors = vectorizer.fit_transform(clustered_emails["clean_text"].tolist())
+    except ValueError:
+        clustered_emails["cluster_id"] = 0
+        clustered_emails["cluster_name"] = "Uncategorized"
+        cluster_summary = pd.DataFrame(
+            [
+                {
+                    "cluster_id": 0,
+                    "cluster_name": "Uncategorized",
+                    "email_count": len(clustered_emails),
+                    "sample_subject": clustered_emails["subject"].iloc[0],
+                    "high_priority_count": (clustered_emails["priority"] == "high").sum(),
+                }
+            ]
+        )
+        return clustered_emails, cluster_summary
 
     model = KMeans(n_clusters=cluster_count, random_state=42, n_init=10)
     clustered_emails["cluster_id"] = model.fit_predict(text_vectors)
