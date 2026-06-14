@@ -12,6 +12,58 @@ from src.priority import add_priority_labels
 
 st.set_page_config(page_title="Gmail Inbox Agent", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+    .app-hero {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.2rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    }
+    .app-hero h1 {
+        margin: 0 0 0.25rem 0;
+        font-size: 2.2rem;
+    }
+    .app-hero p {
+        margin: 0;
+        color: #475569;
+        font-size: 1rem;
+    }
+    .metric-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #ffffff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    }
+    .metric-label {
+        color: #64748b;
+        font-size: 0.82rem;
+        margin-bottom: 0.25rem;
+    }
+    .metric-value {
+        color: #0f172a;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .section-note {
+        color: #64748b;
+        font-size: 0.92rem;
+        margin-top: -0.35rem;
+        margin-bottom: 0.85rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("Gmail Inbox Agent")
 st.caption(
     "Review, search, cluster, prioritize, export, and safely act on Gmail inbox groups."
@@ -58,7 +110,11 @@ def suggest_label_name(cluster_emails: pd.DataFrame, cluster_name: str) -> str:
 
 def get_cluster_message_ids(cluster_emails: pd.DataFrame) -> list[str]:
     """Return Gmail message IDs for a cluster."""
-    message_ids = cluster_emails["message_id"] if "message_id" in cluster_emails.columns else cluster_emails["id"]
+    message_ids = (
+        cluster_emails["message_id"]
+        if "message_id" in cluster_emails.columns
+        else cluster_emails["id"]
+    )
     return [str(message_id) for message_id in message_ids.dropna().tolist()]
 
 
@@ -201,13 +257,24 @@ def render_metrics(all_emails: pd.DataFrame, filtered_emails: pd.DataFrame, clus
     """Render top-line inbox metrics."""
     high_count = int((all_emails["priority"] == "high").sum())
     unread_count = int(all_emails["is_unread"].sum()) if "is_unread" in all_emails.columns else 0
+    metrics = [
+        ("Total emails", len(all_emails)),
+        ("Visible", len(filtered_emails)),
+        ("Clusters", len(cluster_summary)),
+        ("High priority", high_count),
+        ("Unread", unread_count),
+    ]
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Total loaded", len(all_emails))
-    col2.metric("Visible after filters", len(filtered_emails))
-    col3.metric("Clusters", len(cluster_summary))
-    col4.metric("High priority", high_count)
-    col5.metric("Unread", unread_count)
+    for column, (label, value) in zip(st.columns(5), metrics):
+        column.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">{label}</div>
+                <div class="metric-value">{value}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_charts(emails: pd.DataFrame) -> None:
@@ -267,7 +334,7 @@ def render_email_previews(cluster_emails: pd.DataFrame) -> None:
         "snippet",
     ]
     available_columns = [column for column in preview_columns if column in cluster_emails.columns]
-    st.dataframe(cluster_emails[available_columns], use_container_width=True, hide_index=True)
+    st.dataframe(cluster_emails[available_columns], width="stretch", hide_index=True)
 
     for row in cluster_emails.itertuples():
         subject = getattr(row, "subject", "(no subject)") or "(no subject)"
@@ -293,8 +360,9 @@ def render_grouped_email_table(emails: pd.DataFrame, mode: str, service=None) ->
         cluster_name = cluster_emails["cluster_name"].iloc[0]
 
         with st.expander(f"Cluster {cluster_id}: {cluster_name} ({len(cluster_emails)} emails)", expanded=True):
-            render_email_previews(cluster_emails)
-            render_cluster_actions(cluster_id, cluster_emails, cluster_name, mode, service)
+            with st.container(border=True):
+                render_email_previews(cluster_emails)
+                render_cluster_actions(cluster_id, cluster_emails, cluster_name, mode, service)
 
 
 def render_dashboard(emails: pd.DataFrame, cluster_summary: pd.DataFrame, mode: str, service=None) -> None:
@@ -307,7 +375,8 @@ def render_dashboard(emails: pd.DataFrame, cluster_summary: pd.DataFrame, mode: 
     render_metrics(emails, filtered_emails, cluster_summary)
 
     st.subheader("Cluster Summary")
-    st.dataframe(cluster_summary, use_container_width=True, hide_index=True)
+    st.markdown('<div class="section-note">A quick map of the current inbox groups.</div>', unsafe_allow_html=True)
+    st.dataframe(cluster_summary, width="stretch", hide_index=True)
 
     render_charts(filtered_emails if not filtered_emails.empty else emails)
     render_exports(filtered_emails, cluster_summary)
@@ -332,10 +401,28 @@ with st.sidebar:
         st.write(f"Requires local `{CREDENTIALS_FILE}` next to `app.py`.")
 
 if mode == "Demo Mode":
+    st.markdown(
+        """
+        <div class="app-hero">
+            <h1>Demo inbox dashboard</h1>
+            <p>Explore clustering, priority scoring, exports, and simulated actions without Gmail credentials.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.info("Demo Mode is active. No Gmail credentials are needed.")
     emails, cluster_summary = prepare_dashboard_data(load_mock_email_data())
     render_dashboard(emails, cluster_summary, mode)
 else:
+    st.markdown(
+        """
+        <div class="app-hero">
+            <h1>Gmail inbox dashboard</h1>
+            <p>Connect locally with OAuth, analyze recent inbox messages, and take safe grouped actions.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     if not credentials_file_exists():
         st.warning(
             f"Gmail Mode needs `{CREDENTIALS_FILE}` in the project root. "

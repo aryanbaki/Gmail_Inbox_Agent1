@@ -38,14 +38,14 @@ def render_sample_emails_per_cluster(emails: pd.DataFrame) -> None:
                 cluster_emails[
                     ["priority", "from_email", "subject", "date", "snippet"]
                 ],
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 
 
 def render_email_table(emails: pd.DataFrame) -> None:
     """Render the main inbox review table in Streamlit."""
-    st.dataframe(emails, use_container_width=True)
+    st.dataframe(emails, width="stretch")
 
 
 def render_status_message() -> None:

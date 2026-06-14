@@ -21,7 +21,7 @@ The project is designed to be safe for GitHub. Real Gmail OAuth files stay local
 ## File Structure
 
 ```text
-gmail-inbox-agent/
+Gmail_Inbox_Agent1/
   app.py                       Streamlit app entry point
   requirements.txt             Python dependencies
   README.md                    Beginner setup and usage guide
@@ -55,7 +55,7 @@ This app does not support permanent deletion. Archive only removes the `INBOX` l
 ## Local Setup
 
 ```bash
-cd /Users/aryanbaki/Documents/Buildathon/gmail-inbox-agent
+cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent1
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -160,11 +160,11 @@ This project should live in its own repository, not inside another project repo.
 Recommended Git commands:
 
 ```bash
-cd /Users/aryanbaki/Documents/Buildathon/gmail-inbox-agent
+cd /Users/aryanbaki/Documents/Buildathon/Gmail_Inbox_Agent1
 git status
 git add .
 git commit -m "Polish final Gmail Inbox Agent project"
-git remote set-url origin https://github.com/aryanbaki/gmail-inbox-agent.git
+git remote set-url origin https://github.com/aryanbaki/Gmail_Inbox_Agent1.git
 git push -u origin main
 ```
 
