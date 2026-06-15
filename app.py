@@ -20,9 +20,25 @@ st.markdown(
         background: #080b12;
         color: #e5e7eb;
     }
+    h1, h2, h3, h4, h5, h6,
+    p, span, label, div, small,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stWidgetLabel"],
+    [data-testid="stCaptionContainer"] {
+        color: #e5e7eb;
+    }
     [data-testid="stSidebar"] {
-        background: #0d111c;
+        background: #101827;
         border-right: 1px solid #1f2937;
+    }
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div {
+        color: #f8fafc;
     }
     [data-testid="stHeader"] {
         background: rgba(8, 11, 18, 0.75);
@@ -84,13 +100,111 @@ st.markdown(
         margin-top: -0.35rem;
         margin-bottom: 0.85rem;
     }
+    [data-testid="stTextInput"] input,
+    [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+    [data-testid="stRadio"] label,
+    [data-testid="stCheckbox"] label,
+    textarea {
+        background-color: #111827;
+        color: #f8fafc;
+        border-color: #334155;
+    }
+    [data-testid="stTextInput"] input::placeholder {
+        color: #94a3b8;
+    }
+    [data-testid="stSelectbox"] div[data-baseweb="select"] span,
+    [data-testid="stSelectbox"] div[data-baseweb="select"] svg,
+    [data-testid="stRadio"] label p,
+    [data-testid="stCheckbox"] label p {
+        color: #f8fafc;
+        fill: #f8fafc;
+    }
+    div[data-baseweb="popover"],
+    div[data-baseweb="menu"],
+    ul[role="listbox"] {
+        background-color: #111827;
+        border: 1px solid #334155;
+        color: #f8fafc;
+    }
+    ul[role="listbox"] li,
+    div[role="option"] {
+        background-color: #111827;
+        color: #f8fafc;
+    }
+    ul[role="listbox"] li:hover,
+    div[role="option"]:hover {
+        background-color: #1d4ed8;
+        color: #ffffff;
+    }
     div[data-testid="stExpander"] {
         border: 1px solid #1f2937;
         border-radius: 14px;
         background: #0f172a;
     }
+    div[data-testid="stExpander"] details,
+    div[data-testid="stExpander"] summary,
+    div[data-testid="stExpander"] summary p,
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        background: #0f172a;
+        color: #f8fafc;
+    }
+    div[data-testid="stExpander"] summary {
+        border-radius: 14px;
+    }
+    div[data-testid="stExpander"] summary:hover {
+        background: #172033;
+    }
+    div[data-testid="stExpander"] svg {
+        fill: #bfdbfe;
+        color: #bfdbfe;
+    }
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border-color: #26344f;
+        background: #0b1220;
+    }
     div[data-testid="stAlert"] {
         border-radius: 12px;
+    }
+    div[data-testid="stAlert"] p,
+    div[data-testid="stAlert"] div {
+        color: #f8fafc;
+    }
+    .stDataFrame,
+    [data-testid="stDataFrame"],
+    [data-testid="stTable"] {
+        color: #e5e7eb;
+    }
+    [data-testid="stDataFrame"] div,
+    [data-testid="stDataFrame"] span,
+    [data-testid="stDataFrame"] button,
+    [data-testid="stDataFrame"] input {
+        color: #e5e7eb;
+    }
+    button,
+    [data-testid="stBaseButton-secondary"],
+    [data-testid="stDownloadButton"] button {
+        border: 1px solid #3b82f6;
+        background: #13233d;
+        color: #f8fafc;
+        border-radius: 10px;
+    }
+    button:hover,
+    [data-testid="stBaseButton-secondary"]:hover,
+    [data-testid="stDownloadButton"] button:hover {
+        border-color: #60a5fa;
+        background: #1d4ed8;
+        color: #ffffff;
+    }
+    button:disabled,
+    [data-testid="stBaseButton-secondary"]:disabled,
+    [data-testid="stDownloadButton"] button:disabled {
+        border-color: #334155;
+        background: #111827;
+        color: #94a3b8;
+        opacity: 1;
+    }
+    a {
+        color: #93c5fd;
     }
     </style>
     """,
