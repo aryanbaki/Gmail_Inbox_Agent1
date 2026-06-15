@@ -591,6 +591,39 @@ def render_charts(emails: pd.DataFrame) -> None:
         )
         st.plotly_chart(fig, use_container_width=True)
 
+    if {"vector_x", "vector_y", "cluster_name"}.issubset(emails.columns):
+        st.subheader("Cluster Map")
+        st.markdown(
+            '<div class="section-note">Each point is one email. Nearby points have similar subject, snippet, and body text.</div>',
+            unsafe_allow_html=True,
+        )
+        cluster_map = px.scatter(
+            emails,
+            x="vector_x",
+            y="vector_y",
+            color="cluster_name",
+            symbol="priority",
+            hover_data={
+                "subject": True,
+                "from_email": True,
+                "priority": True,
+                "cluster_name": True,
+                "vector_x": False,
+                "vector_y": False,
+            },
+            template="plotly_dark",
+        )
+        cluster_map.update_traces(marker=dict(size=10, opacity=0.78, line=dict(width=1, color="#0f172a")))
+        cluster_map.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=10, r=10, t=10, b=10),
+            xaxis_title="Topic vector 1",
+            yaxis_title="Topic vector 2",
+            legend_title_text="Cluster",
+        )
+        st.plotly_chart(cluster_map, use_container_width=True)
+
 
 def format_table_value(column: str, value) -> str:
     """Format table values for the dark HTML table renderer."""

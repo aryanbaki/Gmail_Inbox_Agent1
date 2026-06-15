@@ -4,6 +4,7 @@ os.environ.setdefault("LOKY_MAX_CPU_COUNT", "4")
 
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -42,6 +43,8 @@ def cluster_emails(
     if clustered_emails.empty:
         clustered_emails["cluster_id"] = []
         clustered_emails["cluster_name"] = []
+        clustered_emails["vector_x"] = []
+        clustered_emails["vector_y"] = []
         return clustered_emails, pd.DataFrame(
             columns=[
                 "cluster_id",
@@ -58,6 +61,8 @@ def cluster_emails(
     if not clustered_emails["clean_text"].str.strip().any():
         clustered_emails["cluster_id"] = 0
         clustered_emails["cluster_name"] = "Uncategorized"
+        clustered_emails["vector_x"] = 0.0
+        clustered_emails["vector_y"] = 0.0
         cluster_summary = pd.DataFrame(
             [
                 {
@@ -77,6 +82,8 @@ def cluster_emails(
     except ValueError:
         clustered_emails["cluster_id"] = 0
         clustered_emails["cluster_name"] = "Uncategorized"
+        clustered_emails["vector_x"] = 0.0
+        clustered_emails["vector_y"] = 0.0
         cluster_summary = pd.DataFrame(
             [
                 {
@@ -95,6 +102,14 @@ def cluster_emails(
 
     cluster_names = _name_clusters(vectorizer, model)
     clustered_emails["cluster_name"] = clustered_emails["cluster_id"].map(cluster_names)
+    if text_vectors.shape[1] >= 2 and len(clustered_emails) >= 2:
+        reducer = PCA(n_components=2)
+        coordinates = reducer.fit_transform(text_vectors.toarray())
+        clustered_emails["vector_x"] = coordinates[:, 0]
+        clustered_emails["vector_y"] = coordinates[:, 1]
+    else:
+        clustered_emails["vector_x"] = 0.0
+        clustered_emails["vector_y"] = 0.0
 
     cluster_summary = (
         clustered_emails.groupby(["cluster_id", "cluster_name"])

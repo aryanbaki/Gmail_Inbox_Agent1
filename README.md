@@ -6,7 +6,7 @@ The project is designed to be safe for GitHub. Real Gmail OAuth files stay local
 
 ## What The App Does
 
-- Loads demo emails from `data/mock_emails.csv`
+- Loads 200 demo emails from `data/mock_emails.csv`
 - Optionally connects to Gmail locally with OAuth
 - Fetches the last 200 Gmail inbox messages in Gmail Mode
 - Parses sender, subject, date, snippet, body, labels, message ID, and thread ID
@@ -14,7 +14,7 @@ The project is designed to be safe for GitHub. Real Gmail OAuth files stay local
 - Adds priority labels: high, medium, low
 - Explains each priority decision with `priority_reason`
 - Lets you search and filter by text, priority, cluster, sender, and unread status
-- Shows email metrics, cluster summaries, dark Plotly charts, grouped tables, and expandable previews
+- Shows email metrics, cluster summaries, dark Plotly charts, a cluster map, grouped tables, and expandable previews
 - Exports processed emails, cluster summaries, and high priority emails as CSV
 - Provides safe Gmail actions on selected clusters
 
@@ -70,7 +70,7 @@ Demo Mode is the safest way to run the app locally or on Streamlit Cloud.
 2. Choose `Demo Mode` in the sidebar.
 3. Use search, filters, charts, exports, and simulated action buttons.
 
-Demo Mode does not require `credentials.json` or `token.json`.
+Demo Mode does not require `credentials.json` or `token.json`. It is the recommended mode for public demos and Streamlit Cloud deployment because it never touches a real Gmail account.
 
 ## Gmail Setup
 
