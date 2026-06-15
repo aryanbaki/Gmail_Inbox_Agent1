@@ -191,15 +191,34 @@ st.markdown(
         border: 1px solid #334155;
         color: #f8fafc;
     }
-    ul[role="listbox"] li,
-    div[role="option"] {
+    ul[role="listbox"],
+    ul[role="listbox"] div {
         background-color: #111827;
         color: #f8fafc;
     }
+    ul[role="listbox"] li,
+    li[role="option"],
+    li[role="option"] div,
+    li[role="option"] span,
+    div[role="option"],
+    div[role="option"] div,
+    div[role="option"] span {
+        background-color: #111827;
+        color: #f8fafc !important;
+    }
     ul[role="listbox"] li:hover,
+    li[role="option"]:hover,
+    li[role="option"]:hover div,
+    li[role="option"]:hover span,
     div[role="option"]:hover {
         background-color: #1d4ed8;
-        color: #ffffff;
+        color: #ffffff !important;
+    }
+    li[aria-selected="true"],
+    li[aria-selected="true"] div,
+    li[aria-selected="true"] span {
+        background-color: #1e3a5f !important;
+        color: #ffffff !important;
     }
     div[data-testid="stExpander"] {
         border: 1px solid #1f2937;
