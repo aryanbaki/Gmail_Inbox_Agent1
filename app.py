@@ -603,6 +603,16 @@ def render_charts(emails: pd.DataFrame) -> None:
             y="vector_y",
             color="cluster_name",
             symbol="priority",
+            color_discrete_sequence=[
+                "#38bdf8",
+                "#f97316",
+                "#a78bfa",
+                "#22c55e",
+                "#f43f5e",
+                "#facc15",
+                "#2dd4bf",
+                "#fb7185",
+            ],
             hover_data={
                 "subject": True,
                 "from_email": True,
@@ -613,14 +623,45 @@ def render_charts(emails: pd.DataFrame) -> None:
             },
             template="plotly_dark",
         )
-        cluster_map.update_traces(marker=dict(size=10, opacity=0.78, line=dict(width=1, color="#0f172a")))
+        cluster_map.update_traces(
+            marker=dict(
+                size=13,
+                opacity=0.9,
+                line=dict(width=1.6, color="#f8fafc"),
+            ),
+            hoverlabel=dict(
+                bgcolor="#0f172a",
+                bordercolor="#60a5fa",
+                font=dict(color="#f8fafc", size=13),
+            ),
+        )
         cluster_map.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            margin=dict(l=10, r=10, t=10, b=10),
+            plot_bgcolor="#0b1220",
+            margin=dict(l=10, r=10, t=16, b=10),
             xaxis_title="Topic vector 1",
             yaxis_title="Topic vector 2",
             legend_title_text="Cluster",
+            font=dict(color="#f8fafc", size=13),
+            legend=dict(
+                bgcolor="rgba(15, 23, 42, 0.9)",
+                bordercolor="#334155",
+                borderwidth=1,
+                font=dict(color="#f8fafc", size=13),
+                title=dict(font=dict(color="#bfdbfe", size=14)),
+            ),
+        )
+        cluster_map.update_xaxes(
+            gridcolor="#26344f",
+            zerolinecolor="#475569",
+            tickfont=dict(color="#cbd5e1"),
+            title_font=dict(color="#bfdbfe"),
+        )
+        cluster_map.update_yaxes(
+            gridcolor="#26344f",
+            zerolinecolor="#475569",
+            tickfont=dict(color="#cbd5e1"),
+            title_font=dict(color="#bfdbfe"),
         )
         st.plotly_chart(cluster_map, use_container_width=True)
 
