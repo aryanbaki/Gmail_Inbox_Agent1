@@ -144,6 +144,9 @@ The app will show setup instructions in Gmail Mode. Demo Mode still works.
 OAuth opens a browser but fails:
 Check that the Gmail API is enabled and that your OAuth credentials are for a desktop app.
 
+Error 403 `access_denied`:
+Google blocked the OAuth request before the app could read Gmail. In Google Cloud Console, make sure the Gmail API is enabled, the OAuth consent screen includes your Gmail address as a test user if the app is in Testing mode, and the OAuth client is a Desktop app client. Then download a fresh OAuth JSON file, rename it to `credentials.json`, place it next to `app.py`, delete local `token.json` if it exists, and try Gmail Mode again.
+
 Token problems:
 Stop the app, delete local `token.json`, and try Gmail Mode again. Do not commit the new token.
 

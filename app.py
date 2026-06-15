@@ -1,3 +1,6 @@
+from html import escape
+from typing import Optional
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -99,6 +102,68 @@ st.markdown(
         font-size: 0.92rem;
         margin-top: -0.35rem;
         margin-bottom: 0.85rem;
+    }
+    .dark-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #26344f;
+        border-radius: 14px;
+        background: #0b1220;
+        margin: 0.65rem 0 1.1rem 0;
+    }
+    .dark-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #e5e7eb;
+        font-size: 0.88rem;
+        min-width: 720px;
+    }
+    .dark-table thead th {
+        background: #172033;
+        color: #bfdbfe;
+        font-weight: 700;
+        text-align: left;
+        padding: 0.8rem 0.9rem;
+        border-bottom: 1px solid #334155;
+        white-space: nowrap;
+    }
+    .dark-table tbody td {
+        padding: 0.72rem 0.9rem;
+        border-bottom: 1px solid #1f2a44;
+        vertical-align: top;
+        color: #e5e7eb;
+    }
+    .dark-table tbody tr:nth-child(even) {
+        background: #101827;
+    }
+    .dark-table tbody tr:hover {
+        background: #13233d;
+    }
+    .dark-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+    .dark-pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+    .priority-high {
+        background: rgba(239, 68, 68, 0.18);
+        color: #fecaca;
+        border: 1px solid rgba(248, 113, 113, 0.35);
+    }
+    .priority-medium {
+        background: rgba(245, 158, 11, 0.18);
+        color: #fde68a;
+        border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+    .priority-low {
+        background: rgba(34, 197, 94, 0.18);
+        color: #bbf7d0;
+        border: 1px solid rgba(74, 222, 128, 0.35);
     }
     [data-testid="stTextInput"] input,
     [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
@@ -282,6 +347,36 @@ def show_action_result(action_name: str, result: dict) -> None:
                 st.write(error)
 
     st.info("Reload Gmail Mode to refresh the inbox and cluster view.")
+
+
+def show_gmail_oauth_help(error: Exception) -> None:
+    """Explain common local OAuth access-denied setup problems."""
+    error_text = str(error)
+    st.error("Gmail Mode could not finish the Google sign-in.")
+
+    if "access_denied" in error_text.lower() or "403" in error_text:
+        st.warning(
+            "Google blocked the OAuth request before Gmail Inbox Agent could access the inbox. "
+            "This usually means the OAuth consent screen is still in Testing mode and your "
+            "Google account is not listed as a test user, the Gmail API is not enabled, or the "
+            "OAuth client is not a Desktop app client."
+        )
+        st.markdown(
+            """
+            **Fix in Google Cloud Console**
+
+            1. Open your Google Cloud project.
+            2. Enable the Gmail API.
+            3. Open OAuth consent screen and add your Gmail address as a test user.
+            4. Confirm the OAuth client type is Desktop app.
+            5. Download the client JSON again, rename it to `credentials.json`, and place it next to `app.py`.
+            6. Delete local `token.json` if it exists, then retry Gmail Mode.
+            """
+        )
+    else:
+        st.warning(error_text)
+
+    st.info("Demo Mode still works without Gmail access, and no credentials or tokens are committed to Git.")
 
 
 def render_cluster_actions(
@@ -478,6 +573,51 @@ def render_charts(emails: pd.DataFrame) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
+def format_table_value(column: str, value) -> str:
+    """Format table values for the dark HTML table renderer."""
+    if pd.isna(value):
+        return ""
+
+    text = escape(str(value))
+    if column == "priority":
+        priority_class = f"priority-{text.lower()}"
+        return f'<span class="dark-pill {priority_class}">{text}</span>'
+
+    return text
+
+
+def render_dark_table(dataframe: pd.DataFrame, columns: list[str], max_rows: Optional[int] = None) -> None:
+    """Render a readable dark table without Streamlit's white dataframe toolbar."""
+    available_columns = [column for column in columns if column in dataframe.columns]
+    if not available_columns:
+        st.info("No table columns are available for this view.")
+        return
+
+    visible_rows = dataframe[available_columns].copy()
+    if max_rows is not None:
+        visible_rows = visible_rows.head(max_rows)
+
+    headers = "".join(f"<th>{escape(column.replace('_', ' ').title())}</th>" for column in available_columns)
+    body_rows = []
+
+    for row in visible_rows.to_dict(orient="records"):
+        cells = "".join(
+            f"<td>{format_table_value(column, row.get(column, ''))}</td>"
+            for column in available_columns
+        )
+        body_rows.append(f"<tr>{cells}</tr>")
+
+    table_html = f"""
+    <div class="dark-table-wrap">
+        <table class="dark-table">
+            <thead><tr>{headers}</tr></thead>
+            <tbody>{''.join(body_rows)}</tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
 def render_exports(emails: pd.DataFrame, cluster_summary: pd.DataFrame) -> None:
     """Render CSV export buttons."""
     st.subheader("Exports")
@@ -520,7 +660,7 @@ def render_email_previews(cluster_emails: pd.DataFrame) -> None:
         "snippet",
     ]
     available_columns = [column for column in preview_columns if column in cluster_emails.columns]
-    st.dataframe(cluster_emails[available_columns], width="stretch", hide_index=True)
+    render_dark_table(cluster_emails, available_columns)
 
     for row in cluster_emails.itertuples():
         subject = getattr(row, "subject", "(no subject)") or "(no subject)"
@@ -562,7 +702,10 @@ def render_dashboard(emails: pd.DataFrame, cluster_summary: pd.DataFrame, mode: 
 
     st.subheader("Cluster Summary")
     st.markdown('<div class="section-note">A quick map of the current inbox groups.</div>', unsafe_allow_html=True)
-    st.dataframe(cluster_summary, width="stretch", hide_index=True)
+    render_dark_table(
+        cluster_summary,
+        ["cluster_id", "cluster_name", "email_count", "sample_subject", "high_priority_count"],
+    )
 
     render_charts(filtered_emails if not filtered_emails.empty else emails)
     render_exports(filtered_emails, cluster_summary)
@@ -632,6 +775,6 @@ else:
             st.success(f"Fetched {len(emails)} Gmail inbox messages.")
             render_dashboard(emails, cluster_summary, mode, service)
         except (GmailAuthError, GmailClientError) as error:
-            st.error(str(error))
+            show_gmail_oauth_help(error)
         except Exception as error:
-            st.error(f"Gmail Mode could not finish: {error}")
+            show_gmail_oauth_help(error)
