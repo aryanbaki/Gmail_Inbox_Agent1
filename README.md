@@ -108,7 +108,7 @@ Demo Mode does not need `credentials.json` or `token.json`.
 
 ## Gmail Mode
 
-Gmail Mode is meant for local use.
+Gmail Mode is meant for local use. If someone else wants to connect their own Gmail account, they should create their own Google Cloud OAuth credentials and keep those files on their own computer.
 
 1. Open Google Cloud Console.
 2. Create or choose a project.
@@ -120,6 +120,25 @@ Gmail Mode is meant for local use.
 8. Place it in the project root next to `app.py`.
 9. Run the app and choose `Gmail Mode`.
 10. Complete the browser login.
+
+### Use Your Own Gmail Account
+
+To use this project with a different Gmail account:
+
+1. Create your own Google Cloud project.
+2. Enable the Gmail API in that project.
+3. Add your Gmail address as a test user if the OAuth app is in Testing mode.
+4. Create OAuth credentials for a Desktop app.
+5. Download the OAuth client file.
+6. Rename the file to `credentials.json`.
+7. Place `credentials.json` in the same folder as `app.py`.
+8. Run `streamlit run app.py`.
+9. Select `Gmail Mode` in the sidebar.
+10. Sign in with the Gmail account you want to review.
+
+After the first login, Google creates a local `token.json` file for that account. If you want to switch accounts later, stop the app, delete `token.json`, restart the app, and sign in with the new account.
+
+Each user should use their own `credentials.json` and `token.json`. Do not share or commit those files.
 
 The app uses the Gmail modify scope because it can archive messages, mark messages as read, and apply labels:
 
@@ -148,3 +167,11 @@ https://share.streamlit.io/
 ```
 
 The deployed app can be shared after Streamlit finishes building it.
+
+## Live App
+
+Open the deployed project here:
+
+```text
+https://gmail-inbox-agent.streamlit.app/
+```
